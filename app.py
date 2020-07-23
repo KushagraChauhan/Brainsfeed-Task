@@ -61,7 +61,7 @@ def getdata():
             findMails(soup)
 
         else:
-            newurl=url+link
+            newurl=weburl+link
             r=requests.get(newurl)
             data=r.text
             soup=BeautifulSoup(data,'html.parser')
