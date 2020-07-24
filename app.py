@@ -36,57 +36,47 @@ def getdata():
     ######################### Get Contact Email ##################################
     ###############################################################################
     ###############################################################################
-    # allLinks = [];mails=[]
-    # links = [a.attrs.get('href') for a in soup.select('a[href]') ]
-    # for i in links:
-    #     if(("contact" in i or "Contact")or("Career" in i or "career" in i))or('about' in i or "About" in i)or('Services' in i or 'services' in i):
-    #         allLinks.append(i)
-    # allLinks=set(allLinks)
-    # def findMails(soup):
-    #     for name in soup.find_all('a'):
-    #         if(name is not None):
-    #             emailText=name.text
-    #             match=bool(re.match('[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$',emailText))
-    #             if('@' in emailText and match==True):
-    #                 emailText=emailText.replace(" ",'').replace('\r','')
-    #                 emailText=emailText.replace('\n','').replace('\t','')
-    #                 if(len(mails)==0)or(emailText not in mails):
-    #                     print(emailText)
-    #                 mails.append(emailText)
-    # for link in allLinks:
-    #     if(link.startswith("http") or link.startswith("www")):
-    #         r=requests.get(link)
-    #         data=r.text
-    #         soup=BeautifulSoup(data,'html.parser')
-    #         findMails(soup)
-    #
-    #     else:
-    #         newurl=weburl+link
-    #         r=requests.get(newurl)
-    #         data=r.text
-    #         soup=BeautifulSoup(data,'html.parser')
-    #         findMails(soup)
-    # mails=set(mails)
-    # if(len(mails)==0):
-    #     print("NO MAILS FOUND")
+    allLinks = [];mails=[]
+    links = [a.attrs.get('href') for a in soup.select('a[href]') ]
+    for i in links:
+        if(("contact" in i or "Contact")or("Career" in i or "career" in i))or('about' in i or "About" in i)or('Services' in i or 'services' in i):
+            allLinks.append(i)
+    allLinks=set(allLinks)
+    def findMails(soup):
+        for name in soup.find_all('a'):
+            if(name is not None):
+                emailText=name.text
+                match=bool(re.match('[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$',emailText))
+                if('@' in emailText and match==True):
+                    emailText=emailText.replace(" ",'').replace('\r','')
+                    emailText=emailText.replace('\n','').replace('\t','')
+                    if(len(mails)==0)or(emailText not in mails):
+                        print(emailText)
+                    mails.append(emailText)
+    for link in allLinks:
+        if(link.startswith("http") or link.startswith("www")):
+            r=requests.get(link)
+            data=r.text
+            soup=BeautifulSoup(data,'html.parser')
+            findMails(soup)
+
+        else:
+            newurl=weburl+link
+            r=requests.get(newurl)
+            data=r.text
+            soup=BeautifulSoup(data,'html.parser')
+            findMails(soup)
+    mails=set(mails)
+    if(len(mails)==0):
+        print("NO MAILS FOUND")
     ################################################################################
     ###############################################################################
     ######################### Short Description ##################################
     ###############################################################################
     ###############################################################################
-    newurl=weburl+'/about'
-    print(newurl)
-    r=requests.get(newurl)
-    data=r.text
-    soup=BeautifulSoup(data,'html.parser')
-
-    for short_desc in soup.find_all('p'):
-        print(short_desc.get_text())
-
-    # 
-    # short_desc=set(short_desc)
-    # if(len(short_desc)==0):
-    #     print("Couldn't find about section")
+    metas = soup.find_all('meta')
+    short_desc = [ meta.attrs['content'] for meta in metas if 'name' in meta.attrs and meta.attrs['name'] == 'description' ]
+    print(short_desc)
 
 #######################################################################################
     return jsonify(titleText)
