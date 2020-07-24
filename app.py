@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from flask import Flask, render_template, jsonify, request
 import requests, re
 from selenium import webdriver
+from gensim.summarization import summarize
 from time import sleep
 app = Flask(__name__)
 
@@ -25,59 +26,74 @@ def getdata():
     ######################### Take a SS of the homepage# ###########################
     ###############################################################################
     ###############################################################################
-    driver = webdriver.PhantomJS()
-    driver.set_window_size(1120, 550)
-    driver.get(weburl)
-    sleep(4)
-    driver.get_screenshot_as_file("screenshot.png")
-    driver.quit()
+    # driver = webdriver.PhantomJS()
+    # driver.set_window_size(1120, 550)
+    # driver.get(weburl)
+    # sleep(4)
+    # driver.get_screenshot_as_file("screenshot.png")
+    # driver.quit()
     ################################################################################
     ###############################################################################
     ######################### Get Contact Email ##################################
     ###############################################################################
     ###############################################################################
-    allLinks = [];mails=[]
-    links = [a.attrs.get('href') for a in soup.select('a[href]') ]
-    for i in links:
-        if(("contact" in i or "Contact")or("Career" in i or "career" in i))or('about' in i or "About" in i)or('Services' in i or 'services' in i):
-            allLinks.append(i)
-    allLinks=set(allLinks)
-    def findMails(soup):
-        for name in soup.find_all('a'):
-            if(name is not None):
-                emailText=name.text
-                match=bool(re.match('[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$',emailText))
-                if('@' in emailText and match==True):
-                    emailText=emailText.replace(" ",'').replace('\r','')
-                    emailText=emailText.replace('\n','').replace('\t','')
-                    if(len(mails)==0)or(emailText not in mails):
-                        print(emailText)
-                    mails.append(emailText)
-    for link in allLinks:
-        if(link.startswith("http") or link.startswith("www")):
-            r=requests.get(link)
-            data=r.text
-            soup=BeautifulSoup(data,'html.parser')
-            findMails(soup)
+    # allLinks = [];mails=[]
+    # links = [a.attrs.get('href') for a in soup.select('a[href]') ]
+    # for i in links:
+    #     if(("contact" in i or "Contact")or("Career" in i or "career" in i))or('about' in i or "About" in i)or('Services' in i or 'services' in i):
+    #         allLinks.append(i)
+    # allLinks=set(allLinks)
+    # def findMails(soup):
+    #     for name in soup.find_all('a'):
+    #         if(name is not None):
+    #             emailText=name.text
+    #             match=bool(re.match('[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$',emailText))
+    #             if('@' in emailText and match==True):
+    #                 emailText=emailText.replace(" ",'').replace('\r','')
+    #                 emailText=emailText.replace('\n','').replace('\t','')
+    #                 if(len(mails)==0)or(emailText not in mails):
+    #                     print(emailText)
+    #                 mails.append(emailText)
+    # for link in allLinks:
+    #     if(link.startswith("http") or link.startswith("www")):
+    #         r=requests.get(link)
+    #         data=r.text
+    #         soup=BeautifulSoup(data,'html.parser')
+    #         findMails(soup)
+    #
+    #     else:
+    #         newurl=weburl+link
+    #         r=requests.get(newurl)
+    #         data=r.text
+    #         soup=BeautifulSoup(data,'html.parser')
+    #         findMails(soup)
+    # mails=set(mails)
+    # if(len(mails)==0):
+    #     print("NO MAILS FOUND")
+    # ################################################################################
+    # ###############################################################################
+    # ######################### Short Description ##################################
+    # ###############################################################################
+    # ###############################################################################
+    # metas = soup.find_all('meta')
+    # short_desc = [ meta.attrs['content'] for meta in metas if 'name' in meta.attrs and meta.attrs['name'] == 'description' ]
+    # print(short_desc)
 
-        else:
-            newurl=weburl+link
-            r=requests.get(newurl)
-            data=r.text
-            soup=BeautifulSoup(data,'html.parser')
-            findMails(soup)
-    mails=set(mails)
-    if(len(mails)==0):
-        print("NO MAILS FOUND")
     ################################################################################
     ###############################################################################
-    ######################### Short Description ##################################
+    ######################### Summarize the content ##################################
     ###############################################################################
     ###############################################################################
-    metas = soup.find_all('meta')
-    short_desc = [ meta.attrs['content'] for meta in metas if 'name' in meta.attrs and meta.attrs['name'] == 'description' ]
-    print(short_desc)
-
+    headline = soup.find('h1').get_text()
+    p_tags = soup.find_all('p')
+    p_tags_text = [tag.get_text().strip() for tag in p_tags]
+    # Filter out sentences that contain newline characters '\n' or don't contain periods.
+    sentence_list = [sentence for sentence in p_tags_text if not '\n' in sentence]
+    sentence_list = [sentence for sentence in sentence_list if '.' in sentence]
+    # Combine list items into string.
+    article = ' '.join(sentence_list)
+    summary = summarize(article, ratio=0.3)
+    print(summary)
 #######################################################################################
     return jsonify(titleText)
 
