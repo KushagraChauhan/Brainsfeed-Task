@@ -115,12 +115,26 @@ def getdata():
         p_tags_text = p_tags_text.strip('[]')
         summary = headline1 + (' ') + headline2 + (' ') + headline3
     print('summary:',summary)
+
+    ################################################################################
+    ###############################################################################
+    ######################### Paid services ##################################
+    ###############################################################################
+    ###############################################################################
+    word = 'pricing'
+    words = soup.find(text=lambda text: text and word in text)
+    if len(words)>0:
+        print(words)
+        pricing = "Yes"
+    else:
+        pricing = "No"
 #################################################################################
 #################################################################################
 ######################### Get the JSON Response ##################################
 #################################################################################
 #################################################################################
-    x = {"Title":titleText,"screenshot link":ssLink,"email":mails, "short description":short_desc, "summary":summary}
+
+    x = {"Title":titleText,"Screenshot Link":ssLink,"Email":mails, "Short Description":short_desc, "Summary":summary, "Paid Services":pricing}
     y = json.dumps(x)
     z = json.loads(y)
     return jsonify(z)
