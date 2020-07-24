@@ -38,10 +38,10 @@ def getdata():
     files = {
     'file': ('screenshot.png', open('screenshot.png', 'rb')),
     }
-
     response = requests.post('https://file.io/', files=files)
     json_resp = response.json()
     ssLink = json_resp['link']
+    print(ssLink)
     ###############################################################################
     ##############################################################################
     ######################## Get Contact Email ##################################
@@ -53,8 +53,8 @@ def getdata():
         if(("contact" in i or "Contact")or("Career" in i or "career" in i))or('about' in i or "About" in i)or('Services' in i or 'services' in i):
             allLinks.append(i)
     allLinks=set(allLinks)
-    def findMails(soup):
-        for name in soup.find_all('a'):
+    def findMails(soup_email):
+        for name in soup_email.find_all('a'):
             if(name is not None):
                 emailText=name.text
                 match=bool(re.match('[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$',emailText))
@@ -68,47 +68,62 @@ def getdata():
         if(link.startswith("http") or link.startswith("www")):
             r=requests.get(link)
             data=r.text
-            soup=BeautifulSoup(data,'html.parser')
-            findMails(soup)
+            soup_email=BeautifulSoup(data,'html.parser')
+            findMails(soup_email)
 
         else:
             newurl=weburl+link
             r=requests.get(newurl)
             data=r.text
-            soup=BeautifulSoup(data,'html.parser')
-            findMails(soup)
-    mails=set(mails)
+            soup_email=BeautifulSoup(data,'html.parser')
+            findMails(soup_email)
+    print("mails",mails)
     if(len(mails)==0):
         print("NO MAILS FOUND")
+
     ################################################################################
     ###############################################################################
     ######################### Short Description ##################################
     ###############################################################################
     ###############################################################################
     metas = soup.find_all('meta')
-    short_desc = [ meta.attrs['content'] for meta in metas if 'name' in meta.attrs and meta.attrs['name'] == 'description' ]
-    print(short_desc)
+    short_desc = [ meta.attrs['content'] for meta in metas if 'name' in meta.attrs and meta.attrs['name'] == 'description']
+    short_desc = str(short_desc)
+    short_desc = short_desc.strip('[]')
+    print("short desc:",short_desc)
 
     ################################################################################
     ###############################################################################
     ######################### Summarize the content ##################################
     ###############################################################################
     ###############################################################################
-    headline = soup.find('h1').get_text()
+    headline1 = soup.find('h1').get_text()
+    headline2 = soup.find('h2').get_text()
+    headline3 = soup.find('h3').get_text()
+    print("h1",headline1)
+    print("h2",headline2)
+    print("h3",headline3)
     p_tags = soup.find_all('p')
     p_tags_text = [tag.get_text().strip() for tag in p_tags]
+    print("p-tags",p_tags_text)
     sentence_list = [sentence for sentence in p_tags_text if not '\n' in sentence]
     sentence_list = [sentence for sentence in sentence_list if '.' in sentence]
     article = ' '.join(sentence_list)
     summary = summarize(article, ratio=0.3)
-    print(summary)
-################################################################################
-###############################################################################
+    if len(summary)==0 :
+        p_tags_text = str(p_tags_text)
+        p_tags_text = p_tags_text.strip('[]')
+        summary = headline1 + (' ') + headline2 + (' ') + headline3
+    print('summary:',summary)
+#################################################################################
+#################################################################################
 ######################### Get the JSON Response ##################################
-###############################################################################
-###############################################################################
-
-    return jsonify(titleText)
+#################################################################################
+#################################################################################
+    x = {"Title":titleText,"screenshot link":ssLink,"email":mails, "short description":short_desc, "summary":summary}
+    y = json.dumps(x)
+    z = json.loads(y)
+    return jsonify(z)
 
 
 if __name__ == "__main__":
