@@ -51,39 +51,39 @@ def getdata():
     ######################## Get Contact Email ##################################
     ##############################################################################
     ##############################################################################
-    allLinks = [];mails=[]
-    links = [a.attrs.get('href') for a in soup.select('a[href]') ]
-    for i in links:
-        if(("contact" in i or "Contact")or("Career" in i or "career" in i))or('about' in i or "About" in i)or('Services' in i or 'services' in i):
-            allLinks.append(i)
-    allLinks=set(allLinks)
-    def findMails(soup_email):
-        for name in soup_email.find_all('a'):
-            if(name is not None):
-                emailText=name.text
-                match=bool(re.match('[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$',emailText))
-                if('@' in emailText and match==True):
-                    emailText=emailText.replace(" ",'').replace('\r','')
-                    emailText=emailText.replace('\n','').replace('\t','')
-                    if(len(mails)==0)or(emailText not in mails):
-                        print(emailText)
-                    mails.append(emailText)
-    for link in allLinks:
-        if(link.startswith("http") or link.startswith("www")):
-            r=requests.get(link)
-            data=r.text
-            soup_email=BeautifulSoup(data,'html.parser')
-            findMails(soup_email)
-
-        else:
-            newurl=weburl+link
-            r=requests.get(newurl)
-            data=r.text
-            soup_email=BeautifulSoup(data,'html.parser')
-            findMails(soup_email)
-    print("mails",mails)
-    if(len(mails)==0):
-        print("NO MAILS FOUND")
+    # allLinks = [];mails=[]
+    # links = [a.attrs.get('href') for a in soup.select('a[href]') ]
+    # for i in links:
+    #     if(("contact" in i or "Contact")or("Career" in i or "career" in i))or('about' in i or "About" in i)or('Services' in i or 'services' in i):
+    #         allLinks.append(i)
+    # allLinks=set(allLinks)
+    # def findMails(soup_email):
+    #     for name in soup_email.find_all('a'):
+    #         if(name is not None):
+    #             emailText=name.text
+    #             match=bool(re.match('[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$',emailText))
+    #             if('@' in emailText and match==True):
+    #                 emailText=emailText.replace(" ",'').replace('\r','')
+    #                 emailText=emailText.replace('\n','').replace('\t','')
+    #                 if(len(mails)==0)or(emailText not in mails):
+    #                     print(emailText)
+    #                 mails.append(emailText)
+    # for link in allLinks:
+    #     if(link.startswith("http") or link.startswith("www")):
+    #         r=requests.get(link)
+    #         data=r.text
+    #         soup_email=BeautifulSoup(data,'html.parser')
+    #         findMails(soup_email)
+    #
+    #     else:
+    #         newurl=weburl+link
+    #         r=requests.get(newurl)
+    #         data=r.text
+    #         soup_email=BeautifulSoup(data,'html.parser')
+    #         findMails(soup_email)
+    # print("mails",mails)
+    # if(len(mails)==0):
+    #     print("NO MAILS FOUND")
 
     ################################################################################
     ###############################################################################
@@ -138,7 +138,7 @@ def getdata():
 #################################################################################
 #################################################################################
 
-    x = {"Title":titleText,"Screenshot Link":ssLink,"Email":mails, "Short Description":short_desc, "Summary":summary, "Paid Services":pricing}
+    x = {"Title":titleText,"Screenshot Link":ssLink,"Email":"", "Short Description":short_desc, "Summary":summary, "Paid Services":pricing}
     y = json.dumps(x)
     z = json.loads(y)
     return jsonify(z)
