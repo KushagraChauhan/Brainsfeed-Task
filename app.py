@@ -6,6 +6,10 @@ from gensim.summarization import summarize
 from time import sleep
 app = Flask(__name__)
 
+@app.route('/')
+def index():
+    return "app is running"
+
 @app.route('/getdata', methods=['GET'])
 def getdata():
     weburl = request.args['url']
