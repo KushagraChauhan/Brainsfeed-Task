@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return "app is running"
+    return "<h1>app is running</h1>"
 
 @app.route('/getdata', methods=['GET'])
 def getdata():
