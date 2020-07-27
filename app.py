@@ -149,7 +149,7 @@ def getdata():
 #################################################################################
 #################################################################################
 
-    x = {"Title":titleText,"Screenshot Link":ssLink,"Email":"newmaillist", "Short Description":short_desc, "Summary":summary, "Paid Services":pricing}
+    x = {"Title":titleText,"Screenshot Link":ssLink,"Email":"", "Short Description":short_desc, "Summary":summary, "Paid Services":pricing}
     y = json.dumps(x)
     z = json.loads(y)
 
