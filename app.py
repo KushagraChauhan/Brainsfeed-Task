@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from flask import Flask, render_template, jsonify, request
-import requests, re, json
+import requests, re, json, csv, io
 from selenium import webdriver
 from gensim.summarization import summarize
 from time import sleep
@@ -31,7 +31,8 @@ def getdata():
     ###############################################################################
     ##############################################################################
     driver = webdriver.PhantomJS()
-    driver.set_window_size(1120, 550)
+    #driver.set_window_size(1120, 550)
+    driver.set_window_size(1024, 768)
     driver.get(weburl)
     sleep(4)
     driver.get_screenshot_as_file("screenshot.png")
@@ -50,7 +51,7 @@ def getdata():
     ##############################################################################
     ######################## Get Contact Email ##################################
     ##############################################################################
-    ##############################################################################
+    # ##############################################################################
     # allLinks = [];mails=[]
     # links = [a.attrs.get('href') for a in soup.select('a[href]') ]
     # for i in links:
@@ -82,6 +83,8 @@ def getdata():
     #         soup_email=BeautifulSoup(data,'html.parser')
     #         findMails(soup_email)
     # print("mails",mails)
+    # mails = set(mails)
+    # newmaillist = list(mails)
     # if(len(mails)==0):
     #     print("NO MAILS FOUND")
 
@@ -90,11 +93,19 @@ def getdata():
     ######################### Short Description ##################################
     ###############################################################################
     ###############################################################################
-    metas = soup.find_all('meta')
-    short_desc = [ meta.attrs['content'] for meta in metas if 'name' in meta.attrs and meta.attrs['name'] == 'description']
-    short_desc = str(short_desc)
-    short_desc = short_desc.strip('[]')
-    print("short desc:",short_desc)
+    def get_description(soup):
+        description = None
+        if soup.find("meta", property="description"):
+            description = soup.find("meta", property="description").get('content')
+        elif soup.find("meta", property="og:description"):
+            description = soup.find("meta", property="og:description").get('content')
+        elif soup.find("meta", property="twitter:description"):
+            description = soup.find("meta", property="twitter:description").get('content')
+        elif soup.find("p"):
+            description = soup.find("p").contents
+        return description
+    short_desc = get_description(soup)
+    print("Short desc:", short_desc)
 
     ################################################################################
     ###############################################################################
@@ -127,20 +138,38 @@ def getdata():
     ###############################################################################
     word = 'pricing'
     words = soup.find(text=lambda text: text and word in text)
-    if len(words)>0:
+    if words == None:
+        pricing = "No"
+    if words != None:
         print(words)
         pricing = "Yes"
-    else:
-        pricing = "No"
 #################################################################################
 #################################################################################
 ######################### Get the JSON Response ##################################
 #################################################################################
 #################################################################################
 
-    x = {"Title":titleText,"Screenshot Link":ssLink,"Email":"", "Short Description":short_desc, "Summary":summary, "Paid Services":pricing}
+    x = {"Title":titleText,"Screenshot Link":ssLink,"Email":"newmaillist", "Short Description":short_desc, "Summary":summary, "Paid Services":pricing}
     y = json.dumps(x)
     z = json.loads(y)
+
+    def should_write_header(fileobj):
+        EOF = fileobj.tell()
+        fileobj.seek(0, io.SEEK_SET)
+        res = fileobj.tell() == EOF
+        if not res:
+            fileobj.seek(EOF, io.SEEK_SET)
+        return res
+
+    with open('Data(copy).csv', mode='a') as csv_file:
+        fieldnames = ['Given Website','Title', 'Website image/screenshot', 'Short_Description', 'contact_email', 'Summarize the website content', 'Is the website has paid service?']
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+
+        #writer.writeheader()
+        if should_write_header(csv_file):
+           writer.writeheader()
+        writer.writerow({'Given Website':weburl,'Title': titleText, 'Website image/screenshot': ssLink, 'Short_Description': short_desc, 'contact_email':mails,'Summarize the website content':summary, 'Is the website has paid service?':pricing})
+
     return jsonify(z)
 
 
