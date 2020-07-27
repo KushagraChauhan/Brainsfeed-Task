@@ -153,22 +153,22 @@ def getdata():
     y = json.dumps(x)
     z = json.loads(y)
 
-    def should_write_header(fileobj):
-        EOF = fileobj.tell()
-        fileobj.seek(0, io.SEEK_SET)
-        res = fileobj.tell() == EOF
-        if not res:
-            fileobj.seek(EOF, io.SEEK_SET)
-        return res
-
-    with open('Data(copy).csv', mode='a') as csv_file:
-        fieldnames = ['Given Website','Title', 'Website image/screenshot', 'Short_Description', 'contact_email', 'Summarize the website content', 'Is the website has paid service?']
-        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-
-        #writer.writeheader()
-        if should_write_header(csv_file):
-           writer.writeheader()
-        writer.writerow({'Given Website':weburl,'Title': titleText, 'Website image/screenshot': ssLink, 'Short_Description': short_desc, 'contact_email':mails,'Summarize the website content':summary, 'Is the website has paid service?':pricing})
+    # def should_write_header(fileobj):
+    #     EOF = fileobj.tell()
+    #     fileobj.seek(0, io.SEEK_SET)
+    #     res = fileobj.tell() == EOF
+    #     if not res:
+    #         fileobj.seek(EOF, io.SEEK_SET)
+    #     return res
+    #
+    # with open('Data(copy).csv', mode='a') as csv_file:
+    #     fieldnames = ['Given Website','Title', 'Website image/screenshot', 'Short_Description', 'contact_email', 'Summarize the website content', 'Is the website has paid service?']
+    #     writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+    #
+    #     #writer.writeheader()
+    #     if should_write_header(csv_file):
+    #        writer.writeheader()
+    #     writer.writerow({'Given Website':weburl,'Title': titleText, 'Website image/screenshot': ssLink, 'Short_Description': short_desc, 'contact_email':mails,'Summarize the website content':summary, 'Is the website has paid service?':pricing})
 
     return jsonify(z)
 
